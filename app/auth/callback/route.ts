@@ -1,17 +1,21 @@
-// app/auth/callback/route.ts
 import { cookies } from 'next/headers';
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { redirect } from 'next/navigation';
 
-export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+export async function GET(req: Request) {
+  const { searchParams, origin } = new URL(req.url);
   const code = searchParams.get('code');
 
   if (code) {
-    const supabase = createServerActionClient({ cookies });
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { cookies }
+    );
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  // Query-Parameter entfernen und zur Startseite
   redirect(origin + '/');
+  // satisfies return‑type
+  return new Response(null, { status: 204 });
 }
