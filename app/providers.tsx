@@ -1,13 +1,19 @@
 'use client';
 
-import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
-import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { createBrowserClient } from '@supabase/ssr';
+import { SessionContextProvider } from '@supabase/ssr/react'; // integriertes React‑Binding
 import { useState } from 'react';
 
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
-  const [supabase] = useState(() => createBrowserSupabaseClient());
+  const [supabase] = useState(() =>
+    createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+  );
+
   return (
-    <SessionContextProvider supabaseClient={supabase}>
+    <SessionContextProvider client={supabase}>
       {children}
     </SessionContextProvider>
   );
