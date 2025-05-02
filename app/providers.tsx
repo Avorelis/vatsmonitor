@@ -1,7 +1,6 @@
 'use client';
 
-import { createBrowserClient } from '@supabase/ssr';
-import { SessionContextProvider } from '@supabase/ssr/react'; // integriertes React‑Binding
+import { createBrowserClient, SessionContextProvider } from '@supabase/ssr';
 import { useState } from 'react';
 
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
