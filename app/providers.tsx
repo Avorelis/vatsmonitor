@@ -5,11 +5,9 @@ import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { useState } from 'react';
 
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
-  // Supabase‑Client nur einmal erzeugen
-  const [supabaseClient] = useState(() => createBrowserSupabaseClient());
-
+  const [supabase] = useState(() => createBrowserSupabaseClient());
   return (
-    <SessionContextProvider supabaseClient={supabaseClient}>
+    <SessionContextProvider supabaseClient={supabase}>
       {children}
     </SessionContextProvider>
   );
