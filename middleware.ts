@@ -1,4 +1,4 @@
-// middleware.ts  (Next 13 / App Router)
+// middleware.ts
 
 import { NextResponse, type NextRequest } from 'next/server';
 import {
@@ -6,12 +6,6 @@ import {
   type CookieOptions,
 } from '@supabase/ssr';
 
-/**
- * Für alle Seiten‑/API‑Aufrufe einen Supabase‑Client bauen,
- * Cookies synchronisieren – entspricht dem alten
- * `createMiddlewareClient`, das in @supabase/ssr ≥0.6
- * nicht mehr vorhanden ist.
- */
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
 
@@ -20,26 +14,28 @@ export async function middleware(req: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get: (key) => req.cookies.get(key)?.value,
-        set: (key, value, options: CookieOptions) =>
-          res.cookies.set({ name: key, value, ...options }),
-        remove: (key, options: CookieOptions) =>
-          res.cookies.set({ name: key, value: '', ...options }),
+        /* 1 · Auslesen */
+        get: (name: string) => req.cookies.get(name)?.value,
+
+        /* 2 · Setzen →  nichts zurückgeben (void!) */
+        set: (name: string, value: string, options: CookieOptions) => {
+          res.cookies.set({ name, value, ...options });
+        },
+
+        /* 3 · Löschen →  ebenfalls void   */
+        remove: (name: string, options: CookieOptions) => {
+          // Next 13 hat kein delete; empty + expires = Vergangenheit
+          res.cookies.set({ name, value: '', expires: new Date(0), ...options });
+        },
       },
     },
   );
 
-  /* 👉 falls Du hier eine Session brauchst:
-  const { data: { session } } = await supabase.auth.getSession();
-  */
+  /* ➜ falls Du hier Session‑Checks brauchst, kannst Du supabase benutzen */
 
   return res;
 }
 
-/**
- *  Alle Pfade außer statischen Assets abfangen
- *  – ggf. anpassen, falls Du nur bestimmte Routen schützen willst.
- */
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };
