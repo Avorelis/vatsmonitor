@@ -1,14 +1,17 @@
-# wrangler.toml  – für Cloudflare Pages + Next.js (Static‑Export)
+# wrangler.toml
+name = "vatsmonitor"
+compatibility_date = "2025-05-03"
 
-name                = "vatsmonitor"        # beliebig, muss nur pro Account eindeutig sein
-compatibility_date  = "2025-05-03"         # heutiges Datum
-pages_build_output_dir = ".vercel/output/static"  # dort landet Next seit v13+ beim Export
+# Seiten-Build-Ausgabe (Next.js + @cloudflare/next-on-pages erzeugt hier die statischen Assets)
+pages_build_output_dir = ".vercel/output/static"
 
-# OPTIONAL: Falls du Pages Functions/Edge Runtime brauchst
-# compatibility_flags = ["nodejs_compat"]
+[build]
+  # Dein lokaler Build-Befehl
+  command = "npm run build"
+  # Verzeichnis, das nach dem Build hochgeladen wird
+  upload = { format = "directory", dir = ".vercel/output/static" }
 
-# OPTIONAL: Wenn du wrangler lokal nutzen willst
-# account_id = "dein‑Account‑ID"
-
-# Build‑Anweisungen übernimmt Cloudflare Pages
-# (du hast sie ja schon im Dashboard hinterlegt)
+# Environment-Variablen, die beim Build und zur Laufzeit verfügbar sind:
+[vars]
+NEXT_PUBLIC_SUPABASE_URL     = "https://vmkyapnksqhperwyqged.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZta3lhcG5rc3FocGVyd3lxZ2VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU4NDY3OTAsImV4cCI6MjA2MTQyMjc5MH0.C2dQONrcvq99wHexgXFIk0R-lrnXNyoF3MbqC-6S4CA"
