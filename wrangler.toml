@@ -1,0 +1,14 @@
+# wrangler.toml  – für Cloudflare Pages + Next.js (Static‑Export)
+
+name                = "vatsmonitor"        # beliebig, muss nur pro Account eindeutig sein
+compatibility_date  = "2025-05-03"         # heutiges Datum
+pages_build_output_dir = ".vercel/output/static"  # dort landet Next seit v13+ beim Export
+
+# OPTIONAL: Falls du Pages Functions/Edge Runtime brauchst
+# compatibility_flags = ["nodejs_compat"]
+
+# OPTIONAL: Wenn du wrangler lokal nutzen willst
+# account_id = "dein‑Account‑ID"
+
+# Build‑Anweisungen übernimmt Cloudflare Pages
+# (du hast sie ja schon im Dashboard hinterlegt)
