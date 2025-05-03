@@ -1,36 +1,39 @@
-// functions/stripe-webhook.ts                <-- bleibt in /functions
+// functions/stripe-webhook.ts
 import { Stripe } from 'stripe';
 
-// 1) Definiere das Typ‑Binding deiner Env‑Variablen
+/** Cloudflare‑Pages‑Env‑Variablen */
 interface Env {
   STRIPE_SECRET_KEY: string;
-  STRIPE_WEBHOOK_SECRET: string; // <= im Dashboard hinterlegen!
+  STRIPE_WEBHOOK_SECRET: string;
 }
 
-// 2) Pages‑Function‑Handler
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  // Stripe‑SDK initialisieren
+/** POST / functions/stripe-webhook */
+export const onRequestPost = async (
+  { request, env }: { request: Request; env: Env },
+): Promise<Response> => {
+  /* 1 · Stripe‑SDK initialisieren */
   const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
     apiVersion: '2023-10-16',
   });
 
-  // 3) Roh‑Body auslesen (Pages liefert bereits einen ReadableStream)
+  /* 2 · Roh‑Body + Signatur auslesen */
   const rawBody = await request.text();
-  const sig = request.headers.get('stripe-signature') || '';
+  const sig = request.headers.get('stripe-signature') ?? '';
 
   try {
-    // 4) Event verifizieren
+    /* 3 · Event verifizieren */
     const event = stripe.webhooks.constructEvent(
       rawBody,
       sig,
-      env.STRIPE_WEBHOOK_SECRET
+      env.STRIPE_WEBHOOK_SECRET,
     );
 
-    // 5) Reagiere auf relevante Events
+    /* 4 · Relevante Events behandeln */
     switch (event.type) {
       case 'checkout.session.completed':
-        // TODO:  ➜  in Supabase Abo‑Status aktualisieren
+        // TODO: Supabase‑Abo‑Status updaten
         break;
+
       // weitere Event‑Typen …
     }
 
