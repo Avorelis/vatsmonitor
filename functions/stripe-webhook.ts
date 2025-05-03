@@ -1,29 +1,42 @@
+// functions/stripe-webhook.ts                <-- bleibt in /functions
 import { Stripe } from 'stripe';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
-  apiVersion: '2023-10-16',
-});
+// 1) Definiere das Typ‑Binding deiner Env‑Variablen
+interface Env {
+  STRIPE_SECRET_KEY: string;
+  STRIPE_WEBHOOK_SECRET: string; // <= im Dashboard hinterlegen!
+}
 
-export const onRequestPost: PagesFunction = async ({ request }) => {
-  const sig = request.headers.get('stripe-signature')!;
-  const body = await request.text();
+// 2) Pages‑Function‑Handler
+export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+  // Stripe‑SDK initialisieren
+  const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+    apiVersion: '2023-10-16',
+  });
 
-  let event: Stripe.Event;
+  // 3) Roh‑Body auslesen (Pages liefert bereits einen ReadableStream)
+  const rawBody = await request.text();
+  const sig = request.headers.get('stripe-signature') || '';
+
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
+    // 4) Event verifizieren
+    const event = stripe.webhooks.constructEvent(
+      rawBody,
       sig,
-      Deno.env.get('STRIPE_WEBHOOK_SECRET')!
+      env.STRIPE_WEBHOOK_SECRET
     );
+
+    // 5) Reagiere auf relevante Events
+    switch (event.type) {
+      case 'checkout.session.completed':
+        // TODO:  ➜  in Supabase Abo‑Status aktualisieren
+        break;
+      // weitere Event‑Typen …
+    }
+
+    return new Response(null, { status: 200 });
   } catch (err) {
-    return new Response(`Webhook Error: ${(err as Error).message}`, { status: 400 });
+    console.error('⚠️  Webhook error', err);
+    return new Response('Webhook Error', { status: 400 });
   }
-
-  // Beispiel‑Handling: Abo erfolgreich
-  if (event.type === 'checkout.session.completed') {
-    // TODO: Supabase Client → user als "paid" markieren
-    console.log('Checkout complete:', event.data.object.id);
-  }
-
-  return new Response(null, { status: 200 });
 };
