@@ -1,5 +1,4 @@
-import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
 
 export async function GET(req: Request) {
@@ -7,15 +6,13 @@ export async function GET(req: Request) {
   const code = searchParams.get('code');
 
   if (code) {
-    const supabase = createServerClient(
+    const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { cookies }
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
     await supabase.auth.exchangeCodeForSession(code);
   }
 
+  // Zurück auf die Startseite
   redirect(origin + '/');
-  // satisfies return‑type
-  return new Response(null, { status: 204 });
 }
