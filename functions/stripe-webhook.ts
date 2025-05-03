@@ -13,7 +13,7 @@ export const onRequestPost = async (
 ): Promise<Response> => {
   /* 1 · Stripe‑SDK initialisieren */
   const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-    apiVersion: '2023-10-16',
+    apiVersion: '2022-11-15', // <- einzig gültiger Literal‑Typ
   });
 
   /* 2 · Roh‑Body + Signatur auslesen */
@@ -33,7 +33,6 @@ export const onRequestPost = async (
       case 'checkout.session.completed':
         // TODO: Supabase‑Abo‑Status updaten
         break;
-
       // weitere Event‑Typen …
     }
 
