@@ -1,46 +1,39 @@
 // app/providers.tsx
 'use client';
 
-import { createBrowserClient, type CookieOptions } from '@supabase/ssr';
-import { createContext, useState, type ReactNode } from 'react';
+import { createBrowserClient, SupabaseClient } from '@supabase/ssr';
+import {
+  type ReactNode,
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
 
-// Falls du später einen Hook verwenden möchtest:
-export const SupabaseContext = createContext<ReturnType<
-  typeof createBrowserClient
-> | null>(null);
+/* ---------- Context ---------- */
+const SupabaseCtx = createContext<SupabaseClient | null>(null);
 
-interface Props {
-  children: ReactNode;
-}
+/** Hook, um den Client in Components zu nutzen */
+export const useSupabase = () => {
+  const ctx = useContext(SupabaseCtx);
+  if (!ctx) throw new Error('useSupabase must be used within SupabaseProvider');
+  return ctx;
+};
 
-/**
- *   SupabaseProvider
- *   ----------------
- *   Stellt den auf Browser‑Seite initialisierten Supabase‑Client
- *   per React‑Context zur Verfügung.
- */
-export default function SupabaseProvider({ children }: Props) {
-  // Den Client nur einmal pro Browser-Session anlegen
+/* ---------- Provider ---------- */
+export default function SupabaseProvider({ children }: { children: ReactNode }) {
+  // Client erst anlegen, wenn wir **wirklich im Browser** laufen
   const [supabase] = useState(() =>
-    createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
-      {
-        // OPTIONAL: Hier kannst du Cookie‑Optionen setzen,
-        // z.B. um das Persist‑Verhalten anzupassen.
-        cookies: {
-          // Beispiel: Zugriff nur SameSite=Lax
-          set: (_name: string, _value: string, _options?: CookieOptions) => {},
-          get: () => undefined,
-          remove: () => {},
-        },
-      }
-    )
+    typeof window === 'undefined'
+      ? null
+      : createBrowserClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        )
   );
 
-  return (
-    <SupabaseContext.Provider value={supabase}>
-      {children}
-    </SupabaseContext.Provider>
-  );
+  // Beim SSR/Build einfach nur die Kinder durchreichen
+  if (!supabase) return <>{children}</>;
+
+  return <SupabaseCtx.Provider value={supabase}>{children}</SupabaseCtx.Provider>;
 }
