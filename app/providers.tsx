@@ -2,7 +2,7 @@
 
 import {
   createBrowserClient,
-  SessionContextProvider,
+  SupabaseContextProvider,
 } from '@supabase/ssr';
 import { useState } from 'react';
 
@@ -19,8 +19,8 @@ export function SupabaseProvider({
   );
 
   return (
-    <SessionContextProvider supabaseClient={supabase}>
+    <SupabaseContextProvider supabaseClient={supabase}>
       {children}
-    </SessionContextProvider>
+    </SupabaseContextProvider>
   );
 }
