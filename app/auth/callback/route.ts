@@ -1,31 +1,33 @@
 // app/auth/callback/route.ts
 // ──────────────────────────
-// Supabase‑OAuth‑Callback – muss dynamisch bleiben!
+// Supabase‑OAuth‑Callback  ➜  MUSS dynamisch erzeugt werden
 export const dynamic = 'force-dynamic';
 
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
-export async function GET(request: Request) {
-  // 1 · Code aus der Redirect‑URL auslesen
-  const { searchParams } = new URL(request.url);
-  const code = searchParams.get('code');
+export async function GET(request: Request): Promise<Response> {
+  /* 1 · Redirect‑Ziel vorbereiten */
+  const redirectUrl = new URL('/', request.url);
 
+  /* 2 · Code aus der Redirect‑URL lesen */
+  const code = new URL(request.url).searchParams.get('code');
   if (!code) {
-    redirect('/'); // kein Code → zurück zur Startseite
+    // → ohne Code direkt zurück zur App
+    return NextResponse.redirect(redirectUrl);
   }
 
-  // 2 · Supabase‑Server‑Client mit Cookie‑Helpers initialisieren
+  /* 3 · Supabase‑Server‑Client mit Cookie‑Helpers */
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { cookies }
   );
 
-  // 3 · Code gegen Session eintauschen (setzt Auth‑Cookies)
+  /* 4 · Auth‑Code gegen Session eintauschen (setzt Cookies) */
   await supabase.auth.exchangeCodeForSession(code);
 
-  // 4 · Zurück in die App
-  redirect('/');
+  /* 5 · Erfolgreich – zurück in die App */
+  return NextResponse.redirect(redirectUrl);
 }
