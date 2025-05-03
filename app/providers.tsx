@@ -1,12 +1,12 @@
 // app/providers.tsx
 'use client';
 
-import { createBrowserClient, SupabaseClient } from '@supabase/ssr';
+import { createBrowserClient } from '@supabase/ssr';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import {
   type ReactNode,
   createContext,
   useContext,
-  useMemo,
   useState,
 } from 'react';
 
@@ -22,7 +22,7 @@ export const useSupabase = () => {
 
 /* ---------- Provider ---------- */
 export default function SupabaseProvider({ children }: { children: ReactNode }) {
-  // Client erst anlegen, wenn wir **wirklich im Browser** laufen
+  // Client erst im Browser erzeugen
   const [supabase] = useState(() =>
     typeof window === 'undefined'
       ? null
@@ -32,7 +32,6 @@ export default function SupabaseProvider({ children }: { children: ReactNode }) 
         )
   );
 
-  // Beim SSR/Build einfach nur die Kinder durchreichen
   if (!supabase) return <>{children}</>;
 
   return <SupabaseCtx.Provider value={supabase}>{children}</SupabaseCtx.Provider>;
