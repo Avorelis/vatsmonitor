@@ -13,6 +13,9 @@ export async function GET(req: Request) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  // Zurück auf die Startseite
+  // Server‑Redirect zurück zur Startseite
   redirect(origin + '/');
+
+  // ---- never reached, but satisfies Next.js type system ----
+  return new Response(null, { status: 204 });
 }
