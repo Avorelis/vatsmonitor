@@ -1,6 +1,7 @@
 'use client';
 
-import { createBrowserClient, SessionContextProvider } from '@supabase/ssr';
+import { createBrowserClient } from '@supabase/ssr';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { useState } from 'react';
 
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
@@ -12,7 +13,7 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <SessionContextProvider client={supabase}>
+    <SessionContextProvider supabaseClient={supabase}>
       {children}
     </SessionContextProvider>
   );
