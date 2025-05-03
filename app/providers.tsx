@@ -1,9 +1,8 @@
+/* app/providers.tsx */
 'use client';
 
-import {
-  createBrowserClient,
-  SupabaseContextProvider,
-} from '@supabase/ssr';
+import { createBrowserClient } from '@supabase/ssr';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { useState } from 'react';
 
 export function SupabaseProvider({
@@ -15,12 +14,12 @@ export function SupabaseProvider({
     createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    ),
   );
 
   return (
-    <SupabaseContextProvider supabaseClient={supabase}>
+    <SessionContextProvider supabaseClient={supabase}>
       {children}
-    </SupabaseContextProvider>
+    </SessionContextProvider>
   );
 }
