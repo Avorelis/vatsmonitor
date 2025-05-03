@@ -1,20 +1,18 @@
-import Stripe from 'stripe';
-import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { redirect } from 'next/navigation';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2022-11-15',
-});
+export async function GET(req: Request) {
+  const { searchParams, origin } = new URL(req.url);
+  const code = searchParams.get('code');
 
-export async function POST(req: NextRequest) {
-  const { priceId } = await req.json();
+  if (code) {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    await supabase.auth.exchangeCodeForSession(code);
+  }
 
-  const session = await stripe.checkout.sessions.create({
-    mode: 'subscription',
-    line_items: [{ price: priceId, quantity: 1 }],
-    subscription_data: { trial_period_days: 14 },
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout/success`,
-    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/`,
-  });
-
-  return NextResponse.json({ url: session.url });
+  // Zurück auf die Startseite
+  redirect(origin + '/');
 }
