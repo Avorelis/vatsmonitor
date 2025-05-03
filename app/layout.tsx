@@ -1,5 +1,5 @@
 import './globals.css';
-import { SupabaseProvider } from './providers';
+import SupabaseProvider from './providers';
 
 export const metadata = {
   title: 'VATSME Monitor',
